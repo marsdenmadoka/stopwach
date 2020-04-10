@@ -10,7 +10,8 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
     private int seconds = 0;
     private boolean running;
-
+    private boolean wasRunning;//a new variable was running records whether the stopwatch was running before the onStop() method was called
+                               //so that we know whether to set it running again when the activity becomes visible again
 
 
     @Override
@@ -18,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt("seconds", seconds); ///saving the instance of a class
         savedInstanceState.putBoolean("running", running);
+        savedInstanceState.putBoolean("wasRunning", wasRunning);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,13 +28,47 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             seconds = savedInstanceState.getInt("seconds");
             running = savedInstanceState.getBoolean("running");
+            wasRunning = savedInstanceState.getBoolean("wasRunning");
         }
 
         runTimer();//We want the runTimer() method to start running when StopwatchActivity gets created, so we’ll call it in the activity onCreate() method:
 
     }
 
-    public void onClickStart(View view) {
+
+    @Override
+    protected void onStop() {//We need to get the stopwatch to stop when the onStop() method is called.
+        super.onStop();      //note there is big difference between onStop and onDestroy//here we made the invisible activity due to phonecall etc interruptions i.e activity is no longer visible there is interruption but we have NOT destroyed it
+        wasRunning = running; //Record whether the stopwatch was running when the onStop() method was called
+        running = false;     //We need to get the stopwatch to stop when the onStop() method is
+                             //called. To do this, we need to set the value of the running boolean to false.
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();  //Implement the onStart() method. If the stopwatch was running, set it running again.
+        if (wasRunning) {
+            running = true;
+        }
+    }
+/*
+* @Override
+protected void onPause() {
+super.onPause();
+wasRunning = running;
+running = false;
+}
+@Override
+protected void onResume() {
+super.onResume();
+if (wasRunning) {
+running = true;
+}
+}
+* */
+
+    public void onClickStart(View view) { //when button click...NOTE THIS ONCLICK AND  onStart() ARE NOT EVEN CLOSE TO BEING TE SAME
         running=true;//start the stopwatch running
     }
 
